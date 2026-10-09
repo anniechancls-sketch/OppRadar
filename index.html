@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>商机雷达 · 高保真交互原型（演示）</title>
+<style>
+  :root{
+    --primary:#409EFF; --primary-light:#66b1ff; --primary-dark:#3a8ee6;
+    --success:#67C23A; --warning:#E6A23C; --danger:#F56C6C; --info:#909399;
+    --t1:#303133; --t2:#606266; --t3:#909399; --t4:#C0C4CC;
+    --border:#DCDFE6; --border-l:#E4E7ED; --border-ll:#EBEEF5;
+    --bg:#F5F7FA; --card:#FFFFFF; --radius:4px;
+    --shadow:0 2px 12px 0 rgba(0,0,0,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
+    font-size:14px;color:var(--t1);background:var(--bg);-webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit}
+
+  /* ---- demo banner ---- */
+  .demo-banner{
+    background:#FDF6EC;color:#B88230;border-bottom:1px solid #F5DAB1;
+    padding:8px 20px;font-size:12.5px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  }
+  .demo-banner b{color:#96600f}
+  .demo-banner .dot{width:7px;height:7px;border-radius:50%;background:var(--warning);flex:0 0 auto}
+
+  /* ---- layout ---- */
+  .app{display:flex;flex-direction:column;min-height:100vh}
+  .topbar{
+    height:56px;background:#fff;border-bottom:1px solid var(--border-l);display:flex;align-items:center;
+    padding:0 20px;gap:14px;position:sticky;top:0;z-index:30;
+  }
+  .brand{display:flex;align-items:center;gap:9px;font-weight:600;font-size:16px;color:var(--t1);white-space:nowrap}
+  .brand .logo{
+    width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,#409EFF,#2f6fd0);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;
+  }
+  .brand small{font-weight:400;color:var(--t3);font-size:12px;border-left:1px solid var(--border-l);padding-left:9px;margin-left:2px}
+  .topbar .spacer{flex:1}
+  .topbar .who{display:flex;align-items:center;gap:8px;color:var(--t2);font-size:13px}
+  .avatar{width:26px;height:26px;border-radius:50%;background:#EAF2FE;color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+
+  .body{display:flex;flex:1;min-height:0}
+  aside{
+    width:214px;background:#fff;border-right:1px solid var(--border-l);padding:12px 0;flex:0 0 auto;
+    position:sticky;top:56px;align-self:flex-start;max-height:calc(100vh - 56px);overflow:auto;
+  }
+  .menu-group{padding:10px 18px 6px;font-size:12px;color:var(--t4);letter-spacing:.04em}
+  .menu-item{
+    display:flex;align-items:center;gap:10px;padding:0 18px;height:44px;color:var(--t2);cursor:pointer;
+    border-left:3px solid transparent;font-size:14px;user-select:none;
+  }
+  .menu-item:hover{background:#F5F7FA;color:var(--t1)}
+  .menu-item.active{color:var(--primary);background:#ECF5FF;border-left-color:var(--primary);font-weight:500}
+  .menu-item .ico{width:16px;text-align:center;font-size:14px}
+  .menu-item .badge{margin-left:auto;background:var(--danger);color:#fff;font-size:11px;border-radius:9px;padding:1px 6px;font-weight:600}
+
+  main{flex:1;min-width:0;padding:18px 20px 40px}
+  .page-head{display:flex;align-items:flex-end;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .page-head h2{margin:0;font-size:19px;font-weight:600}
+  .page-head p{margin:2px 0 0;color:var(--t3);font-size:12.5px}
+  .page-head .spacer{flex:1}
+
+  /* ---- element-ish components ---- */
+  .card{background:#fff;border:1px solid var(--border-ll);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 18px}
+  .card + .card{margin-top:14px}
+  .card-title{font-size:14px;font-weight:600;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+  .card-title .sub{font-weight:400;color:var(--t3);font-size:12px}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:5px;height:32px;padding:0 14px;
+    border:1px solid var(--border);background:#fff;color:var(--t2);border-radius:var(--radius);
+    cursor:pointer;font-size:13px;line-height:1;transition:.15s;white-space:nowrap;
+  }
+  .btn:hover{color:var(--primary);border-color:#c6e2ff;background:#ecf5ff}
+  .btn:disabled{opacity:.5;cursor:not-allowed;color:var(--t4);border-color:var(--border-l);background:#fff}
+  .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+  .btn.primary:hover{background:var(--primary-light);border-color:var(--primary-light);color:#fff}
+  .btn.success{background:var(--success);border-color:var(--success);color:#fff}
+  .btn.success:hover{opacity:.88;color:#fff}
+  .btn.text{border-color:transparent;background:transparent;color:var(--primary);padding:0 8px}
+  .btn.text:hover{background:#ecf5ff}
+  .btn.sm{height:27px;padding:0 10px;font-size:12.5px}
+  .btn.block{width:100%}
+
+  .tag{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:var(--radius);font-size:12px;line-height:1;border:1px solid;white-space:nowrap}
+  .tag.primary{color:var(--primary);border-color:#b3d8ff;background:#ecf5ff}
+  .tag.success{color:#529b2e;border-color:#c2e7b0;background:#f0f9eb}
+  .tag.warning{color:#b88230;border-color:#f5dab1;background:#fdf6ec}
+  .tag.danger{color:#c45656;border-color:#fbc4c4;background:#fef0f0}
+  .tag.info{color:#73767a;border-color:#d3d4d6;background:#f4f4f5}
+  .tag.plain{color:var(--t2);border-color:var(--border);background:#fff}
+
+  input.el,select.el,textarea.el{
+    height:32px;border:1px solid var(--border);border-radius:var(--radius);padding:0 11px;font-size:13px;
+    color:var(--t1);outline:none;background:#fff;font-family:inherit;
+  }
+  textarea.el{height:auto;padding:8px 11px;resize:vertical;line-height:1.6}
+  input.el:focus,select.el:focus,textarea.el:focus{border-color:var(--primary)}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:12.5px;color:var(--t2)}
+  .field label .req{color:var(--danger);margin-right:2px}
+  .hint{font-size:12px;color:var(--t3)}
+  .err{font-size:12px;color:var(--danger)}
+
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--border-l);margin-bottom:12px;flex-wrap:wrap}
+  .tab{padding:9px 14px;font-size:13.5px;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;gap:6px;align-items:center}
+  .tab:hover{color:var(--primary)}
+  .tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:500}
+
+  table.el{width:100%;border-collapse:collapse;font-size:13px}
+  table.el th{text-align:left;color:var(--t2);font-weight:600;background:#FAFAFA;padding:11px 12px;border-bottom:1px solid var(--border-ll);white-space:nowrap;font-size:12.5px}
+  table.el td{padding:11px 12px;border-bottom:1px solid var(--border-ll);color:var(--t1);vertical-align:middle}
+  table.el tbody tr:hover{background:#F5F7FA}
+  table.el td.actions{white-space:nowrap}
+  .table-wrap{overflow:auto;border:1px solid var(--border-ll);border-radius:var(--radius)}
+  .table-wrap table.el th:first-child,.table-wrap table.el td:first-child{padding-left:16px}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;color:var(--t2)}
+  .muted{color:var(--t3)}
+  .nowrap{white-space:nowrap}
+
+  .grid{display:grid;gap:14px}
+  .stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .cols2{grid-template-columns:1.35fr .9fr}
+  .cols3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media(max-width:1080px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.cols2,.cols3{grid-template-columns:1fr}}
+
+  .stat{background:#fff;border:1px solid var(--border-ll);border-radius:var(--radius);padding:15px 16px;box-shadow:var(--shadow)}
+  .stat .k{font-size:12.5px;color:var(--t3);display:flex;align-items:center;gap:6px}
+  .stat .v{font-size:26px;font-weight:600;margin-top:8px;letter-spacing:-.01em}
+  .stat .d{font-size:12px;color:var(--t3);margin-top:4px}
+  .stat .d.up{color:#529b2e}
+  .stat .d.down{color:#c45656}
+  .stat.warn .v{color:var(--warning)}
+
+  .bar-row{display:flex;align-items:center;gap:10px;margin:9px 0}
+  .bar-row .lab{width:92px;font-size:12.5px;color:var(--t2);flex:0 0 auto}
+  .bar-row .track{flex:1;height:9px;background:#EBEEF5;border-radius:5px;overflow:hidden}
+  .bar-row .fill{height:100%;border-radius:5px;background:var(--primary);transition:width .5s}
+  .bar-row .num{width:56px;text-align:right;font-size:12.5px;color:var(--t2);flex:0 0 auto}
+
+  .donut{display:flex;align-items:center;gap:18px}
+  .legend{font-size:12.5px;color:var(--t2)}
+  .legend div{display:flex;align-items:center;gap:7px;margin:7px 0}
+  .sw{width:10px;height:10px;border-radius:2px;flex:0 0 auto}
+
+  .timeline{list-style:none;margin:0;padding:0}
+  .timeline li{position:relative;padding:0 0 14px 20px;border-left:1px solid var(--border-l);margin-left:5px}
+  .timeline li:last-child{border-left-color:transparent;padding-bottom:0}
+  .timeline li::before{content:"";position:absolute;left:-5px;top:3px;width:9px;height:9px;border-radius:50%;background:#fff;border:2px solid var(--primary)}
+  .timeline li.warn::before{border-color:var(--warning)}
+  .timeline li .t{font-size:12px;color:var(--t3)}
+  .timeline li .x{font-size:13px;color:var(--t1);margin-top:2px}
+
+  .steps{display:flex;gap:0;margin:6px 0 18px;flex-wrap:wrap}
+  .step{flex:1;min-width:150px;position:relative;padding-right:18px}
+  .step .bar{height:3px;background:#EBEEF5;position:relative;margin-bottom:12px;border-radius:2px}
+  .step .bar i{position:absolute;left:0;top:0;height:3px;width:0;background:var(--primary);border-radius:2px}
+  .step.done .bar i{width:100%}
+  .step.active .bar i{width:55%}
+  .step .num{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--t3)}
+  .step.done .num,.step.active .num{color:var(--primary)}
+  .step .circle{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;background:#fff;color:var(--t3)}
+  .step.done .circle{background:var(--primary);border-color:var(--primary);color:#fff}
+  .step.active .circle{border-color:var(--primary);color:var(--primary)}
+  .step .desc{font-size:12px;color:var(--t3);margin-top:6px;font-weight:400;line-height:1.5}
+
+  .kv{display:grid;grid-template-columns:96px 1fr;gap:8px 12px;font-size:13px}
+  .kv .k{color:var(--t3)}
+
+  .callout{border-left:3px solid var(--primary);background:#ecf5ff;padding:11px 14px;border-radius:0 var(--radius) var(--radius) 0;font-size:12.5px;color:#3a6ea5;line-height:1.7}
+  .callout.warn{border-left-color:var(--warning);background:#fdf6ec;color:#96600f}
+  .callout.danger{border-left-color:var(--danger);background:#fef0f0;color:#a33}
+  .callout.success{border-left-color:var(--success);background:#f0f9eb;color:#4a7b2a}
+
+  .drawer-mask{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;z-index:50}
+  .drawer-mask.open{display:block}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:520px;max-width:92vw;background:#fff;z-index:51;
+    box-shadow:-4px 0 18px rgba(0,0,0,.12);transform:translateX(100%);transition:transform .25s;display:flex;flex-direction:column}
+  .drawer.open{transform:translateX(0)}
+  .drawer header{padding:16px 20px;border-bottom:1px solid var(--border-l);display:flex;align-items:center;gap:10px}
+  .drawer header h3{margin:0;font-size:16px}
+  .drawer header .x{margin-left:auto;cursor:pointer;color:var(--t3);font-size:18px;border:0;background:none}
+  .drawer .body{padding:18px 20px;overflow:auto;flex:1}
+  .drawer footer{padding:13px 20px;border-top:1px solid var(--border-l);display:flex;gap:10px;justify-content:flex-end;background:#FAFAFA}
+
+  .toast{
+    position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:99;display:flex;flex-direction:column;gap:8px;align-items:center;
+  }
+  .toast .m{background:#fff;border:1px solid var(--border-l);border-radius:var(--radius);box-shadow:0 4px 16px rgba(0,0,0,.12);
+    padding:10px 16px;font-size:13px;display:flex;gap:8px;align-items:center;min-width:240px}
+  .toast .m.ok{border-left:3px solid var(--success)}
+  .toast .m.no{border-left:3px solid var(--danger)}
+  .toast .m.warn{border-left:3px solid var(--warning)}
+
+  .view{display:none}
+  .view.active{display:block}
+  .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+  .filters .field{min-width:150px}
+  .pager{display:flex;align-items:center;gap:10px;justify-content:flex-end;margin-top:12px;font-size:12.5px;color:var(--t2)}
+  .pager button{min-width:28px;height:28px;border:1px solid var(--border);background:#fff;border-radius:var(--radius);cursor:pointer;color:var(--t2)}
+  .pager button.on{background:var(--primary);border-color:var(--primary);color:#fff}
+
+  footer.foot{color:var(--t3);font-size:12px;margin-top:26px;line-height:1.8;border-top:1px dashed var(--border-l);padding-top:14px}
+
+  @media(max-width:820px){
+    aside{position:fixed;left:0;top:56px;bottom:0;z-index:40;transform:translateX(-100%);transition:.25s}
+    aside.open{transform:translateX(0)}
+    .body{display:block}
+    main{padding:14px 12px 40px}
+    .hamburger{display:inline-flex !important}
+    .stats{grid-template-columns:1fr 1fr}
+  }
+  .hamburger{display:none;width:32px;height:32px;border:1px solid var(--border);background:#fff;border-radius:4px;align-items:center;justify-content:center;cursor:pointer;font-size:15px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="demo-banner" role="note">
+    <span class="dot"></span>
+    <b>演示原型</b>
+    <span>数据全部为示例、非真实采集；机构名称已虚构化处理；未接入真实数据源 / 企业微信 / 数据库；未通过验收。本页用于评审界面与交互，不构成业务通过证据。</span>
+  </div>
+
+  <div class="topbar">
+    <button class="hamburger" onclick="toggleNav()" aria-label="菜单">&#9776;</button>
+    <div class="brand"><span class="logo">雷</span>商机雷达<small>招投标商机自动采集与智能分发</small></div>
+    <div class="spacer"></div>
+    <span class="tag info" title="演示版本，未通过验收">演示版本</span>
+    <div class="who"><span class="avatar">华南</span><span>华南组 · 组员（演示）</span></div>
+  </div>
+
+  <div class="body">
+    <aside id="nav">
+      <div class="menu-group">商机运营</div>
+      <div class="menu-item active" data-view="dashboard"><span class="ico">&#9632;</span>商机看板</div>
+      <div class="menu-item" data-view="list"><span class="ico">&#9776;</span>商机列表<span class="badge" id="navBadge">6</span></div>
+      <div class="menu-item" data-view="mine"><span class="ico">&#9733;</span>我的认领 / 跟进</div>
+      <div class="menu-group">配置与治理</div>
+      <div class="menu-item" data-view="rules"><span class="ico">&#8644;</span>分发规则</div>
+      <div class="menu-item" data-view="sources"><span class="ico">&#9673;</span>数据源管理</div>
+      <div class="menu-item" data-view="stations"><span class="ico">&#8942;</span>五站接力</div>
+      <div class="menu-item" data-view="perms"><span class="ico">&#128274;</span>角色与权限</div>
+      <div class="menu-group">说明</div>
+      <div class="menu-item" data-view="about"><span class="ico">&#9432;</span>关于本原型</div>
+    </aside>
+
+    <main>
+      <!-- ============ 看板 ============ -->
+      <section class="view active" id="view-dashboard">
+        <div class="page-head">
+          <div><h2>商机看板</h2><p>口径未定义前，本页数字均为演示值；正式版将标注口径版本、时间范围与基准日。</p></div>
+          <div class="spacer"></div>
+          <div class="field"><label>时间范围</label>
+            <select class="el" id="dashRange" onchange="renderDashboard()">
+              <option value="7">近 7 天</option>
+              <option value="30" selected>近 30 天</option>
+              <option value="90">近 90 天</option>
+            </select>
+          </div>
+          <button class="btn primary" onclick="toast('导出为演示，未生成真实文件','warn')">导出报表</button>
+        </div>
+
+        <div class="grid stats" id="statCards"></div>
+
+        <div class="grid cols2" style="margin-top:14px">
+          <div class="card">
+            <h3 class="card-title">商机动态 <span class="sub">按级别与状态</span></h3>
+            <div class="table-wrap">
+              <table class="el"><thead><tr><th>商机</th><th>地区</th><th>级别</th><th>金额</th><th>截止</th><th>状态</th><th>操作</th></tr></thead>
+              <tbody id="dashRows"></tbody></table>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <h3 class="card-title">业务指标 <span class="sub">目标值来自 需求</span></h3>
+              <div id="bizBars"></div>
+              <div class="hint" style="margin-top:8px">口径未定：正式实现前需先确认分子 / 分母与时间窗。</div>
+            </div>
+            <div class="card">
+              <h3 class="card-title">处置分布</h3>
+              <div class="donut">
+                <svg width="118" height="118" viewBox="0 0 42 42" aria-label="商机状态分布">
+                  <circle cx="21" cy="21" r="15.9" fill="none" stroke="#EBEEF5" stroke-width="5"></circle>
+                  <circle cx="21" cy="21" r="15.9" fill="none" stroke="#409EFF" stroke-width="5"
+                          stroke-dasharray="38 62" stroke-dashoffset="25" stroke-linecap="butt"></circle>
+                  <circle cx="21" cy="21" r="15.9" fill="none" stroke="#67C23A" stroke-width="5"
+                          stroke-dasharray="26 74" stroke-dashoffset="-13" stroke-linecap="butt"></circle>
+                  <circle cx="21" cy="21" r="15.9" fill="none" stroke="#E6A23C" stroke-width="5"
+                          stroke-dasharray="20 80" stroke-dashoffset="-39" stroke-linecap="butt"></circle>
+                  <circle cx="21" cy="21" r="15.9" fill="none" stroke="#F56C6C" stroke-width="5"
+                          stroke-dasharray="16 84" stroke-dashoffset="-59" stroke-linecap="butt"></circle>
+                </svg>
+                <div class="legend">
+                  <div><span class="sw" style="background:#409EFF"></span>待认领 38%</div>
+                  <div><span class="sw" style="background:#67C23A"></span>跟进中 / 已完成 26%</div>
+                  <div><span class="sw" style="background:#E6A23C"></span>待确认 20%</div>
+                  <div><span class="sw" style="background:#F56C6C"></span>已过期 / 升级 16%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">待处理提醒 <span class="sub">超时节点来自 需求：2h / 24h / 48h</span></h3>
+          <ul class="timeline">
+            <li class="warn"><div class="t">10-09 09:05 · 超时 2h</div><div class="x">「示例市一管材采购」未认领，已提醒华南组。</div></li>
+            <li class="warn"><div class="t">10-08 21:40 · 超时 24h</div><div class="x">「示例市六某中学给排水改造」已升级至华南组组长。</div></li>
+            <li><div class="t">10-08 16:10 · 截止前 3 天</div><div class="x">「示例市二某医院管道招标」投标截止临近，提醒认领人。</div></li>
+            <li><div class="t">10-08 10:02 · 采集异常</div><div class="x">某省级平台返回登录墙，已停止该源并标记「待验证」（合规规则）。</div></li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ============ 列表 ============ -->
+      <section class="view" id="view-list">
+        <div class="page-head">
+          <div><h2>商机列表</h2><p>支持按区域 / 级别 / 类型 / 状态筛选与认领。演示数据共 <span id="totalCount">0</span> 条。</p></div>
+        </div>
+        <div class="card">
+          <div class="filters" style="margin-bottom:12px">
+            <div class="field" style="min-width:210px"><label>关键词</label><input class="el" id="fSearch" placeholder="项目 / 采购单位" oninput="renderList()" /></div>
+            <div class="field"><label>区域组</label><select class="el" id="fRegion" onchange="renderList()"><option value="">全部</option></select></div>
+            <div class="field"><label>级别</label><select class="el" id="fGrade" onchange="renderList()"><option value="">全部</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
+            <div class="field"><label>类型</label><select class="el" id="fCat" onchange="renderList()"><option value="">全部</option><option>招标</option><option>中标</option><option>甲方</option><option>乙方</option></select></div>
+            <div class="field"><label>状态</label><select class="el" id="fStatus" onchange="renderList()"><option value="">全部</option><option>待认领</option><option>已认领</option><option>跟进中</option><option>已完成</option><option>待确认</option><option>已过期</option></select></div>
+            <button class="btn" onclick="resetFilters()">重置</button>
+          </div>
+          <div class="table-wrap">
+            <table class="el">
+              <thead><tr><th>编号</th><th>项目 / 采购单位</th><th>地区</th><th>类型</th><th>级别</th><th>金额</th><th>投标截止</th><th>来源</th><th>状态</th><th>操作</th></tr></thead>
+              <tbody id="listRows"></tbody>
+            </table>
+          </div>
+          <div class="pager">
+            <span id="pageInfo"></span>
+            <button class="on">1</button><button disabled title="演示">2</button><button disabled title="演示">3</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 我的认领 ============ -->
+      <section class="view" id="view-mine">
+        <div class="page-head"><div><h2>我的认领 / 跟进</h2><p>认领后 24h 内须填初步跟进计划；每周更新；投标截止前 3 天提醒。</p></div></div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="el"><thead><tr><th>编号</th><th>项目</th><th>级别</th><th>状态</th><th>初步跟进计划</th><th>下次更新</th><th>操作</th></tr></thead>
+            <tbody id="mineRows"></tbody></table>
+          </div>
+          <div id="mineEmpty" class="hint" style="display:none;padding:18px 4px">还没有认领记录。到「商机列表」认领一条商机后，会出现在这里。</div>
+        </div>
+      </section>
+
+      <!-- ============ 分发规则 ============ -->
+      <section class="view" id="view-rules">
+        <div class="page-head"><div><h2>分发规则</h2><p>来源：演示规则。演示环境只读，正式版支持人工调整并写审计。</p></div></div>
+        <div class="callout warn">分发规则需与组织架构匹配；组织表内容尚未提供，此处为示例。</div>
+        <div class="grid cols3" style="margin-top:14px">
+          <div class="card">
+            <h3 class="card-title">区域路由</h3>
+            <div class="kv">
+              <div class="k">省级商机</div><div>对应区域组</div>
+              <div class="k">跨省商机</div><div>商务组</div>
+              <div class="k">无法匹配</div><div>商务组 + 人工复核</div>
+              <div class="k">央企/大型</div><div>商务组</div>
+            </div>
+          </div>
+          <div class="card">
+            <h3 class="card-title">分级阈值</h3>
+            <div class="kv">
+              <div class="k"><span class="tag danger">A</span></div><div>&ge; 1000 万 · 同时通知组长</div>
+              <div class="k"><span class="tag warning">B</span></div><div>500 – 1000 万 · 2 小时内推送</div>
+              <div class="k"><span class="tag primary">C</span></div><div>100 – 500 万 · 每日汇总</div>
+              <div class="k"><span class="tag info">D</span></div><div>&lt; 100 万 · 按需查看</div>
+            </div>
+            <div class="hint" style="margin-top:10px">金额币种与含税口径待确认。</div>
+          </div>
+          <div class="card">
+            <h3 class="card-title">例外与超时</h3>
+            <ul style="margin:0;padding-left:18px;line-height:1.9;color:var(--t2)">
+              <li>同一商机多人认领：先到先得，组长协调</li>
+              <li>2 小时未认领：自动提醒</li>
+              <li>24 小时未认领：升级组长</li>
+              <li>48 小时未认领：升级部门负责人</li>
+            </ul>
+            <button class="btn sm" style="margin-top:10px" onclick="toast('人工调整分发需权限并在服务端校验（演示未开放）','warn')">人工调整分发</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3 class="card-title">分配日志 <span class="sub">append-only</span></h3>
+          <div class="table-wrap">
+            <table class="el"><thead><tr><th>时间</th><th>商机</th><th>动作</th><th>结果</th><th>操作人</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">10-09 09:00</td><td>T-20261009-004</td><td>自动路由</td><td>→ 华南组</td><td class="muted">系统</td></tr>
+              <tr><td class="mono">10-09 08:52</td><td>T-20261009-003</td><td>自动路由</td><td>→ 商务组（跨省）</td><td class="muted">系统</td></tr>
+              <tr><td class="mono">10-09 08:40</td><td>T-20261009-002</td><td>人工调整</td><td>华东组 → 商务组</td><td class="muted">组长（演示）</td></tr>
+              <tr><td class="mono">10-09 08:20</td><td>T-20261009-001</td><td>自动路由</td><td>→ 华南组</td><td class="muted">系统</td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 数据源 ============ -->
+      <section class="view" id="view-sources">
+        <div class="page-head"><div><h2>数据源管理</h2><p>真实清单未提供。下表仅为示意，不代表已接入。</p></div>
+          <div class="spacer"></div>
+          <button class="btn primary" onclick="toast('真实采集未接入；需先完成授权与合规确认','warn')">触发采集</button>
+        </div>
+        <div class="grid stats" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+          <div class="stat"><div class="k">已配置数据源</div><div class="v">4</div><div class="d muted">示例值</div></div>
+          <div class="stat"><div class="k">今日采集</div><div class="v">126</div><div class="d muted">示例值 · 目标日均 &ge;100</div></div>
+          <div class="stat warn"><div class="k">待验证源</div><div class="v">1</div><div class="d down">登录墙已停止</div></div>
+          <div class="stat"><div class="k">覆盖省份</div><div class="v">3</div><div class="d muted">目标 31 省 · 差距大</div></div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="el"><thead><tr><th>平台</th><th>类型</th><th>覆盖</th><th>数据类型</th><th>采集方式</th><th>最近采集</th><th>状态</th></tr></thead>
+            <tbody>
+              <tr><td>示例政府采购平台</td><td>国家级</td><td>全国</td><td>招标公告</td><td>API</td><td class="mono">10-09 08:00</td><td><span class="tag success">演示正常</span></td></tr>
+              <tr><td>示例市公共资源交易平台</td><td>省级</td><td>示例市</td><td>招标 / 中标</td><td>API</td><td class="mono">10-09 08:02</td><td><span class="tag success">演示正常</span></td></tr>
+              <tr><td>示例省公共资源交易平台</td><td>省级</td><td>示例省</td><td>招标 / 中标</td><td>API</td><td class="mono">10-09 08:04</td><td><span class="tag success">演示正常</span></td></tr>
+              <tr><td>某行业平台</td><td>行业</td><td>行业</td><td>行业动态</td><td>爬虫</td><td class="mono">10-09 07:58</td><td><span class="tag danger">待验证</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="callout danger" style="margin-top:12px">合规规则：触发验证码 / 封禁 / 登录墙立即停止并上报，不使用伪造身份、不绕过访问控制。上表「某行业平台」即为该规则的演示结果。</div>
+        </div>
+      </section>
+
+      <!-- ============ 五站接力 ============ -->
+      <section class="view" id="view-stations">
+        <div class="page-head"><div><h2>五站接力</h2><p>顺序不可跳；下游先验收上游；交接单五字段缺一即退；退回留痕。</p></div></div>
+        <div class="card">
+          <div class="steps">
+            <div class="step done"><div class="bar"><i></i></div><div class="num"><span class="circle">1</span>数据采集</div><div class="desc">《数据采集方案》· 已交付（演示）</div></div>
+            <div class="step done"><div class="bar"><i></i></div><div class="num"><span class="circle">2</span>AI 识别</div><div class="desc">《AI识别方案》· 已交付（演示）</div></div>
+            <div class="step active"><div class="bar"><i></i></div><div class="num"><span class="circle">3</span>产品流程</div><div class="desc">《产品流程方案》· 进行中</div></div>
+            <div class="step"><div class="bar"><i></i></div><div class="num"><span class="circle">4</span>运营推广</div><div class="desc">《运营推广方案》· 未开始</div></div>
+            <div class="step"><div class="bar"><i></i></div><div class="num"><span class="circle">5</span>汇总终审</div><div class="desc">《商机雷达运营方案》· 未开始</div></div>
+          </div>
+          <div class="grid cols2">
+            <div>
+              <h3 class="card-title">第 3 站 · 交接单（五字段，缺一即退）</h3>
+              <div class="field" style="margin-bottom:10px"><label><span class="req">*</span>结论</label>
+                <input class="el" id="h1" placeholder="本站核心判断（1-2 句）" value="按区域自动分发可行，跨省与无法匹配统一转商务组人工复核。" /></div>
+              <div class="field" style="margin-bottom:10px"><label><span class="req">*</span>依据编号</label>
+                <input class="el" id="h2" placeholder="如 I-3、I-4、I-5" /></div>
+              <div class="field" style="margin-bottom:10px"><label><span class="req">*</span>适用范围</label>
+                <input class="el" id="h3" placeholder="本方案适用的边界条件" value="试点期：建工事业部 8 组 52 人" /></div>
+              <div class="field" style="margin-bottom:10px"><label><span class="req">*</span>缺口清单</label>
+                <textarea class="el" id="h4" rows="2" placeholder="未确认或待补充的内容">区域字段拆分方式与组长联系方式待确认。</textarea></div>
+              <div class="field" style="margin-bottom:12px"><label><span class="req">*</span>责任角色</label>
+                <input class="el" id="h5" placeholder="谁负责确认缺口项" value="业务负责人 / IT 管理员" /></div>
+              <div id="hErr" class="err" style="display:none;margin-bottom:8px"></div>
+              <div style="display:flex;gap:10px">
+                <button class="btn primary" onclick="submitHandoff()">提交交接单</button>
+                <button class="btn" onclick="toast('已模拟提交给第 4 站（演示，不落库）','ok')">模拟验收通过 → 第 4 站</button>
+              </div>
+            </div>
+            <div>
+              <h3 class="card-title">退回留痕 <span class="sub">时间 / 退回方 / 缺项 / 补齐后再交</span></h3>
+              <div class="table-wrap">
+                <table class="el"><thead><tr><th>时间</th><th>站点</th><th>退回方</th><th>缺项</th><th>补齐时间</th></tr></thead>
+                <tbody>
+                  <tr><td class="mono">10-08 15:20</td><td>第 2 站</td><td>第 3 站</td><td>缺「依据编号」</td><td class="mono">10-08 16:05</td></tr>
+                  <tr><td class="mono">10-09 09:10</td><td>第 1 站</td><td>第 2 站</td><td>某平台可达性未标注「待验证」</td><td class="mono">10-09 09:35</td></tr>
+                </tbody></table>
+              </div>
+              <div class="callout" style="margin-top:12px">退回不等于扣分，藏住不退才扣分。终审遇冲突标「待确认」，不得擅自定案。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 权限 ============ -->
+      <section class="view" id="view-perms">
+        <div class="page-head"><div><h2>角色与权限</h2><p>角色 × 区域组 × 动作，服务端校验。身份与企微授权未提供。</p></div></div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="el"><thead><tr><th>角色</th><th>数据范围</th><th>查看</th><th>认领</th><th>更新跟进</th><th>调整分发</th><th>配置数据源</th><th>导出</th></tr></thead>
+            <tbody>
+              <tr><td>区域组员</td><td>本组区域</td><td><span class="tag success">是</span></td><td><span class="tag success">是</span></td><td><span class="tag success">自己的</span></td><td><span class="tag info">否</span></td><td><span class="tag info">否</span></td><td>本组</td></tr>
+              <tr><td>组长</td><td>本组区域</td><td><span class="tag success">是</span></td><td><span class="tag success">是</span></td><td><span class="tag success">本组</span></td><td><span class="tag success">本组</span></td><td><span class="tag info">否</span></td><td>本组</td></tr>
+              <tr><td>商务组</td><td>跨省 / 央企大型</td><td><span class="tag success">是</span></td><td><span class="tag success">是</span></td><td><span class="tag success">是</span></td><td><span class="tag success">是</span></td><td><span class="tag info">否</span></td><td>商务</td></tr>
+              <tr><td>部门负责人</td><td>本部门</td><td><span class="tag success">是</span></td><td><span class="tag info">否</span></td><td>查看</td><td><span class="tag success">是</span></td><td><span class="tag info">否</span></td><td>本部门</td></tr>
+              <tr><td>运营 / 管理员</td><td>全局</td><td><span class="tag success">是</span></td><td><span class="tag info">否</span></td><td><span class="tag info">否</span></td><td><span class="tag success">是</span></td><td><span class="tag success">是</span></td><td>全局</td></tr>
+            </tbody></table>
+          </div>
+          <div class="callout danger" style="margin-top:12px">隐藏按钮不构成权限隔离。当前无真实身份提供方，权限能力无法验证 → 相关验收用例尚未执行。</div>
+        </div>
+      </section>
+
+      <!-- ============ 关于 ============ -->
+      <section class="view" id="view-about">
+        <div class="page-head"><div><h2>关于本原型</h2><p>本页对应界面规格；原型为演示版本，未通过验收。</p></div></div>
+        <div class="grid cols2">
+          <div class="card">
+            <h3 class="card-title">它是什么 / 不是什么</h3>
+            <div class="kv">
+              <div class="k">是什么</div><div>界面与交互评审用的高保真原型，采用 Element UI 风格，覆盖看板、列表、认领、跟进、规则、数据源、五站接力、权限八个界面。</div>
+              <div class="k">不是什么</div><div>不是可运行系统：没有后端、数据库、真实采集、企微推送、权限校验；数字为演示数据。</div>
+              <div class="k">技术说明</div><div>单文件、无外部依赖、离线可打开；仅用原生 HTML/CSS/JS 模拟 Element Plus 视觉与组件行为。</div>
+              <div class="k">证据声明</div><div>截图或演示均不能作为业务验收证据；业务用例全部 NOT_RUN。</div>
+            </div>
+          </div>
+          <div class="card">
+            <h3 class="card-title">与规格的对应</h3>
+            <div class="table-wrap">
+              <table class="el"><thead><tr><th>界面</th><th>规格</th></tr></thead>
+              <tbody>
+                <tr><td>看板 / 列表 / 认领 / 跟进</td><td>看板 / 列表 / 认领 / 跟进</td></tr>
+                <tr><td>分发规则 / 分配日志</td><td>分发规则与分配日志</td></tr>
+                <tr><td>数据源 / 合规中断</td><td>数据源与合规中断</td></tr>
+                <tr><td>五站接力 / 交接单</td><td>五站接力与交接单</td></tr>
+                <tr><td>角色与权限</td><td>角色与权限</td></tr>
+              </tbody></table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="foot">
+        商机雷达 · 交互原型（演示数据）· 未接入真实接口 · 未通过验收。
+      </footer>
+    </main>
+  </div>
+</div>
+
+<!-- 商机详情 / 认领抽屉 -->
+<div class="drawer-mask" id="mask" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <header><h3 id="dTitle">商机详情</h3><button class="x" onclick="closeDrawer()" aria-label="关闭">&times;</button></header>
+  <div class="body" id="dBody"></div>
+  <footer id="dFoot"></footer>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 演示数据（非真实采集） ============ */
+const REGIONS = ["东北组","华北组","华东组","华南组","华中组","西南组","西北组","商务组"];
+const TENDERS = [
+  {id:"T-20261009-001",title:"示例市一某产业园区给排水管材采购项目",purchaser:"示例市一住建局",province:"示例省",region:"华南组",cat:"招标",grade:"A",amount:12800000,publish:"2026-10-09 08:20",deadline:"2026-10-29 17:00",status:"待认领",source:"示例省公共资源交易平台",conf:0.94,owner:"",plan:""},
+  {id:"T-20261009-002",title:"示例市六某中学给排水系统改造工程",purchaser:"示例市六教育局",province:"示例省",region:"华南组",cat:"招标",grade:"C",amount:3260000,publish:"2026-10-08 21:40",deadline:"2026-10-24 15:00",status:"待认领",source:"示例省公共资源交易平台",conf:0.88,owner:"",plan:""},
+  {id:"T-20261009-003",title:"跨省联合数据中心管道与阀门框架采购",purchaser:"示例央企基建部",province:"多省",region:"商务组",cat:"招标",grade:"A",amount:21500000,publish:"2026-10-09 08:52",deadline:"2026-11-05 17:00",status:"待认领",source:"示例政府采购平台",conf:0.91,owner:"",plan:""},
+  {id:"T-20261009-004",title:"示例市二某医院管道系统招标",purchaser:"示例市二卫生健康局",province:"示例省",region:"华南组",cat:"招标",grade:"B",amount:7600000,publish:"2026-10-08 16:10",deadline:"2026-10-11 17:00",status:"已认领",source:"示例省公共资源交易平台",conf:0.93,owner:"我",plan:"已联系设计院，本周内确认技术参数与投标可行性。"},
+  {id:"T-20261009-005",title:"示例市三给水管道材料采购",purchaser:"示例市三水务局",province:"示例市",region:"华东组",cat:"招标",grade:"B",amount:6800000,publish:"2026-10-09 07:30",deadline:"2026-10-27 17:00",status:"待认领",source:"示例市公共资源交易平台",conf:0.90,owner:"",plan:""},
+  {id:"T-20261009-006",title:"示例市七某污水处理厂管道改造",purchaser:"示例市七水务集团",province:"浙江",region:"华东组",cat:"中标",grade:"C",amount:4300000,publish:"2026-10-08 14:05",deadline:"",status:"跟进中",source:"某行业平台",conf:0.72,owner:"我",plan:"已获取中标结果，跟踪后续分包与材料需求。"},
+  {id:"T-20261009-007",title:"示例市四某产业园管道采购",purchaser:"示例市四管委",province:"北京",region:"华北组",cat:"招标",grade:"A",amount:9800000,publish:"2026-10-09 06:50",deadline:"2026-10-30 16:00",status:"待认领",source:"示例政府采购平台",conf:0.92,owner:"",plan:""},
+  {id:"T-20261009-008",title:"示例市五给排水管材招标",purchaser:"示例市五建设局",province:"湖北",region:"华中组",cat:"招标",grade:"D",amount:860000,publish:"2026-10-08 11:20",deadline:"2026-10-22 15:00",status:"已完成",source:"示例政府采购平台",conf:0.85,owner:"他组演示",plan:"已完成报价与投标提交。"},
+  {id:"T-20261009-009",title:"示例高新区综合管廊管材采购",purchaser:"示例高新区管委会",province:"四川",region:"西南组",cat:"招标",grade:"C",amount:3900000,publish:"2026-10-09 09:05",deadline:"2026-10-26 17:00",status:"待确认",source:"某行业平台",conf:0.58,owner:"",plan:""},
+  {id:"T-20261009-010",title:"示例市八某市政管网改造工程",purchaser:"示例市八住建局",province:"陕西",region:"西北组",cat:"招标",grade:"B",amount:5400000,publish:"2026-10-08 18:35",deadline:"2026-10-25 17:00",status:"待认领",source:"示例政府采购平台",conf:0.89,owner:"",plan:""},
+  {id:"T-20261009-011",title:"示例市九某小区二次供水管道改造",purchaser:"示例市九水务局",province:"辽宁",region:"东北组",cat:"招标",grade:"D",amount:620000,publish:"2026-10-07 10:00",deadline:"2026-10-09 17:00",status:"已过期",source:"示例政府采购平台",conf:0.83,owner:"",plan:""},
+  {id:"T-20261009-012",title:"某央企总部大楼管道翻新",purchaser:"示例中央企业",province:"多省",region:"商务组",cat:"甲方",grade:"A",amount:15600000,publish:"2026-10-09 07:15",deadline:"2026-11-02 17:00",status:"待认领",source:"示例招标平台",conf:0.87,owner:"",plan:""},
+  {id:"T-20261009-013",title:"示例市十某医院给排水管材招标",purchaser:"示例市十卫健委",province:"福建",region:"华东组",cat:"招标",grade:"C",amount:2700000,publish:"2026-10-09 09:30",deadline:"2026-10-28 15:00",status:"待确认",source:"某行业平台",conf:0.61,owner:"",plan:""},
+  {id:"T-20261009-014",title:"示例市十一某水厂管道更新",purchaser:"示例市十一水务集团",province:"黑龙江",region:"东北组",cat:"招标",grade:"B",amount:5100000,publish:"2026-10-08 15:45",deadline:"2026-10-23 17:00",status:"待认领",source:"示例政府采购平台",conf:0.90,owner:"",plan:""}
+];
+
+/* ============ 工具 ============ */
+const $ = (s)=>document.querySelector(s);
+const money = (v)=> v==null ? '<span class="muted">待确认</span>' : (v/10000).toFixed(0)+" 万";
+const gradeTag = (g)=>({A:'danger',B:'warning',C:'primary',D:'info'}[g]||'info');
+const statusTag = (s)=>({'待认领':'warning','已认领':'primary','跟进中':'primary','已完成':'success','待确认':'info','已过期':'danger'}[s]||'info');
+
+function toast(msg,kind){
+  const box=$('#toast');
+  const el=document.createElement('div');
+  el.className='m '+(kind==='ok'?'ok':kind==='no'?'no':'warn');
+  el.innerHTML='<span>'+(kind==='ok'?'&#10003;':kind==='no'?'&#10007;':'&#33;')+'</span><span>'+msg+'</span>';
+  box.appendChild(el);
+  setTimeout(()=>{el.style.transition='opacity .4s';el.style.opacity='0';setTimeout(()=>el.remove(),400);},2600);
+}
+function toggleNav(){ $('#nav').classList.toggle('open'); }
+
+/* ============ 导航 ============ */
+document.querySelectorAll('.menu-item').forEach(it=>{
+  it.addEventListener('click',()=>{
+    document.querySelectorAll('.menu-item').forEach(x=>x.classList.remove('active'));
+    it.classList.add('active');
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    const id='view-'+it.dataset.view;
+    const v=document.getElementById(id); if(v) v.classList.add('active');
+    $('#nav').classList.remove('open');
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(it.dataset.view==='dashboard') renderDashboard();
+    if(it.dataset.view==='mine') renderMine();
+  });
+});
+function goView(name){
+  const it=document.querySelector('.menu-item[data-view="'+name+'"]');
+  if(it) it.click();
+}
+
+/* ============ 看板 ============ */
+function renderDashboard(){
+  const days=+($('#dashRange').value||30);
+  const factor=days===7?0.32:days===90?2.4:1;
+  const total=Math.round(TENDERS.length*11*factor);
+  const stats=[
+    {k:"新增商机",v:total,d:"演示值 · 目标日均 ≥100 条",cls:""},
+    {k:"覆盖率",v:"62%",d:"目标 ≥95% · 演示未达标",cls:"warn"},
+    {k:"认领率",v:"41%",d:"目标 ≥60% · 演示未达标",cls:"warn"},
+    {k:"跟进率",v:"55%",d:"目标 ≥40% · 演示达标",cls:""}
+  ];
+  $('#statCards').innerHTML=stats.map(s=>
+    '<div class="stat '+(s.cls||'')+'"><div class="k">'+s.k+'</div><div class="v">'+s.v+'</div><div class="d">'+s.d+'</div></div>').join('');
+
+  const rows=TENDERS.slice(0,6).map(t=>
+    '<tr><td><div style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+t.title+'">'+t.title+'</div><div class="mono muted">'+t.id+'</div></td>'+
+    '<td class="nowrap">'+t.province+' · '+t.region+'</td>'+
+    '<td><span class="tag '+gradeTag(t.grade)+'">'+t.grade+' 级</span></td>'+
+    '<td class="nowrap">'+money(t.amount)+'</td>'+
+    '<td class="nowrap mono">'+(t.deadline||'—')+'</td>'+
+    '<td><span class="tag '+statusTag(t.status)+'">'+t.status+'</span></td>'+
+    '<td class="actions"><button class="btn text sm" onclick="openDetail(\''+t.id+'\')">详情</button></td></tr>').join('');
+  $('#dashRows').innerHTML=rows;
+
+  const bars=[{l:"覆盖率",v:62,t:95},{l:"认领率",v:41,t:60},{l:"跟进率",v:55,t:40},{l:"转化率",v:7,t:10},{l:"响应时效",v:50,t:50}];
+  $('#bizBars').innerHTML=bars.map(b=>
+    '<div class="bar-row"><div class="lab">'+b.l+'</div><div class="track"><div class="fill" style="width:'+Math.min(100,b.v)+'%;background:'+(b.v>=b.t?'#67C23A':'#409EFF')+'"></div></div>'+
+    '<div class="num">'+b.v+'% / '+b.t+'%</div></div>').join('');
+}
+
+/* ============ 列表 ============ */
+function initRegions(){
+  const sel=$('#fRegion');
+  REGIONS.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;sel.appendChild(o);});
+  $('#totalCount').textContent=TENDERS.length;
+}
+function resetFilters(){
+  $('#fSearch').value=''; $('#fRegion').value=''; $('#fGrade').value=''; $('#fCat').value=''; $('#fStatus').value='';
+  renderList();
+}
+function filtered(){
+  const kw=$('#fSearch').value.trim().toLowerCase();
+  const rg=$('#fRegion').value, gr=$('#fGrade').value, ct=$('#fCat').value, st=$('#fStatus').value;
+  return TENDERS.filter(t=>
+    (!kw||(t.title+t.purchaser+t.id).toLowerCase().includes(kw)) &&
+    (!rg||t.region===rg) && (!gr||t.grade===gr) && (!ct||t.cat===ct) && (!st||t.status===st));
+}
+function renderList(){
+  const rows=filtered();
+  $('#pageInfo').textContent='共 '+rows.length+' 条（演示分页）';
+  $('#listRows').innerHTML=rows.length?rows.map(t=>
+    '<tr><td class="mono">'+t.id+'</td>'+
+    '<td><div style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+t.title+'">'+t.title+'</div><div class="muted" style="font-size:12px">'+t.purchaser+'</div></td>'+
+    '<td class="nowrap">'+t.province+'<div class="muted" style="font-size:12px">'+t.region+'</div></td>'+
+    '<td>'+t.cat+'</td>'+
+    '<td><span class="tag '+gradeTag(t.grade)+'">'+t.grade+'</span></td>'+
+    '<td class="nowrap">'+money(t.amount)+'</td>'+
+    '<td class="nowrap mono">'+(t.deadline||'<span class="muted">缺失</span>')+'</td>'+
+    '<td class="nowrap">'+t.source+'<div class="muted" style="font-size:12px">置信度 '+(t.conf?t.conf.toFixed(2):'—')+'</div></td>'+
+    '<td><span class="tag '+statusTag(t.status)+'">'+t.status+'</span></td>'+
+    '<td class="actions"><button class="btn text sm" onclick="openDetail(\''+t.id+'\')">详情</button>'+
+    (t.status==='待认领'?'<button class="btn primary sm" onclick="openClaim(\''+t.id+'\')">认领</button>':'')+
+    '</td></tr>').join('')
+    :'<tr><td colspan="10" style="text-align:center;color:#909399;padding:26px">没有符合条件的商机（演示数据）</td></tr>';
+  const pend=TENDERS.filter(t=>t.status==='待认领').length;
+  $('#navBadge').textContent=pend;
+}
+
+/* ============ 我的认领 ============ */
+function renderMine(){
+  const mine=TENDERS.filter(t=>t.owner==='我');
+  $('#mineEmpty').style.display=mine.length?'none':'block';
+  $('#mineRows').innerHTML=mine.map(t=>
+    '<tr><td class="mono">'+t.id+'</td>'+
+    '<td><div style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t.title+'</div></td>'+
+    '<td><span class="tag '+gradeTag(t.grade)+'">'+t.grade+'</span></td>'+
+    '<td><span class="tag '+statusTag(t.status)+'">'+t.status+'</span></td>'+
+    '<td style="max-width:280px;color:#606266">'+(t.plan||'<span class="muted">未填写</span>')+'</td>'+
+    '<td class="muted nowrap">每周一</td>'+
+    '<td class="actions"><button class="btn text sm" onclick="openFollow(\''+t.id+'\')">更新状态</button><button class="btn text sm" onclick="openDetail(\''+t.id+'\')">详情</button></td></tr>').join('');
+}
+
+/* ============ 抽屉 ============ */
+function openDrawer(title,bodyHtml,footHtml){
+  $('#dTitle').textContent=title;
+  $('#dBody').innerHTML=bodyHtml;
+  $('#dFoot').innerHTML=footHtml||'';
+  $('#mask').classList.add('open'); $('#drawer').classList.add('open'); $('#drawer').setAttribute('aria-hidden','false');
+}
+function closeDrawer(){ $('#mask').classList.remove('open'); $('#drawer').classList.remove('open'); $('#drawer').setAttribute('aria-hidden','true'); }
+
+function openDetail(id){
+  const t=TENDERS.find(x=>x.id===id); if(!t) return;
+  const body=
+    '<div class="callout" style="margin-bottom:14px">演示数据，非真实采集结果。金额与时间为示例。</div>'+
+    '<h4 style="margin:0 0 6px">'+t.title+'</h4>'+
+    '<div class="muted" style="margin-bottom:14px">'+t.purchaser+' · '+t.province+' · '+t.region+'</div>'+
+    '<div class="kv">'+
+      '<div class="k">编号</div><div class="mono">'+t.id+'</div>'+
+      '<div class="k">类型 / 级别</div><div>'+t.cat+' · <span class="tag '+gradeTag(t.grade)+'">'+t.grade+' 级</span></div>'+
+      '<div class="k">金额</div><div>'+money(t.amount)+' <span class="muted">（币种与含税口径待确认）</span></div>'+
+      '<div class="k">发布时间</div><div class="mono">'+t.publish+'</div>'+
+      '<div class="k">投标截止</div><div class="mono">'+(t.deadline||'<span class="muted">缺失，不推断</span>')+'</div>'+
+      '<div class="k">数据来源</div><div>'+t.source+'<div class="mono muted">https://demo.local/tender/'+t.id+' · 采集于 2026-10-09 09:00</div></div>'+
+      '<div class="k">识别置信度</div><div>'+(t.conf?t.conf.toFixed(2):'—')+(t.conf&&t.conf<0.7?' <span class="tag warning">低置信，需人工复核</span>':'')+'</div>'+
+      '<div class="k">状态</div><div><span class="tag '+statusTag(t.status)+'">'+t.status+'</span></div>'+
+      '<div class="k">跟进计划</div><div>'+(t.plan||'<span class="muted">未填写</span>')+'</div>'+
+    '</div>';
+  const foot = t.status==='待认领'
+    ? '<button class="btn" onclick="closeDrawer()">关闭</button><button class="btn primary" onclick="openClaim(\''+t.id+'\')">认领</button>'
+    : '<button class="btn" onclick="closeDrawer()">关闭</button>';
+  openDrawer('商机详情',body,foot);
+}
+
+function openClaim(id){
+  const t=TENDERS.find(x=>x.id===id); if(!t) return;
+  if(t.status!=='待认领'){ toast('该商机已被认领，遵循先到先得','no'); return; }
+  const body=
+    '<div class="callout warn" style="margin-bottom:14px">认领后 24 小时内须填写初步跟进计划；每周更新跟进状态。</div>'+
+    '<div style="font-weight:600;margin-bottom:4px">'+t.title+'</div>'+
+    '<div class="muted" style="margin-bottom:14px">'+t.id+' · '+t.region+' · '+t.grade+' 级 · '+money(t.amount)+'</div>'+
+    '<div class="field"><label><span class="req">*</span>初步跟进计划</label>'+
+    '<textarea class="el" id="claimPlan" rows="4" placeholder="例如：联系设计院确认技术参数；评估投标可行性；明确报价负责人。"></textarea>'+
+    '<div class="hint">提交即占用该商机；服务端以唯一约束保证并发安全。</div></div>';
+  const foot='<button class="btn" onclick="closeDrawer()">取消</button><button class="btn success" onclick="doClaim(\''+id+'\')">确认认领</button>';
+  openDrawer('认领商机',body,foot);
+}
+function doClaim(id){
+  const t=TENDERS.find(x=>x.id===id); if(!t) return;
+  const plan=($('#claimPlan')?.value||'').trim();
+  if(!plan){ toast('请填写初步跟进计划','no'); return; }
+  t.status='已认领'; t.owner='我'; t.plan=plan;
+  closeDrawer(); renderList(); renderDashboard();
+  toast('认领成功：'+t.id+'（演示，未落库）','ok');
+}
+
+function openFollow(id){
+  const t=TENDERS.find(x=>x.id===id); if(!t) return;
+  const body=
+    '<div style="font-weight:600;margin-bottom:4px">'+t.title+'</div>'+
+    '<div class="muted" style="margin-bottom:14px">'+t.id+'</div>'+
+    '<div class="field" style="margin-bottom:12px"><label>跟进状态</label>'+
+    '<select class="el" id="fuStatus"><option>跟进中</option><option>已完成</option><option>已放弃</option></select></div>'+
+    '<div class="field"><label>本周更新说明</label><textarea class="el" id="fuNote" rows="3" placeholder="例如：已完成技术交流，等待招标文件发布。">'+t.plan+'</textarea></div>';
+  const foot='<button class="btn" onclick="closeDrawer()">取消</button><button class="btn primary" onclick="doFollow(\''+id+'\')">提交更新</button>';
+  openDrawer('更新跟进',body,foot);
+}
+function doFollow(id){
+  const t=TENDERS.find(x=>x.id===id); if(!t) return;
+  t.status=$('#fuStatus').value; t.plan=($('#fuNote').value||'').trim();
+  closeDrawer(); renderMine(); renderList(); renderDashboard();
+  toast('跟进已更新（演示，未落库）','ok');
+}
+
+/* ============ 交接单 ============ */
+function submitHandoff(){
+  const ids=['h1','h2','h3','h4','h5'];
+  const names={h1:'结论',h2:'依据编号',h3:'适用范围',h4:'缺口清单',h5:'责任角色'};
+  const miss=ids.filter(i=>!($('#'+i).value||'').trim());
+  const err=$('#hErr');
+  if(miss.length){
+    err.style.display='block';
+    err.textContent='422 未通过：缺少必交字段 → '+miss.map(i=>names[i]).join('、')+'。下游应先验收上游，缺一即退。';
+    toast('交接单被退回：缺少 '+miss.length+' 个必交字段','no');
+  }else{
+    err.style.display='none';
+    toast('交接单五字段齐全，可提交下游（演示，未落库）','ok');
+  }
+}
+
+/* ============ 启动 ============ */
+initRegions();
+renderDashboard();
+renderList();
+renderMine();
+</script>
+</body>
+</html>
